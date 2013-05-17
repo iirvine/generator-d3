@@ -136,46 +136,6 @@ AppGenerator.prototype.writeIndex = function writeIndex() {
   this.indexFile = this.indexFile.replace('<body>', '<body>\n' + contentText.join('\n'));
 };
 
-// TODO(mklabs): to be put in a subgenerator like rjs:app
-AppGenerator.prototype.requirejs = function requirejs() {
-  if (this.includeRequireJS) {
-    this.indexFile = this.appendScripts(this.indexFile, 'scripts/main.js', ['bower_components/requirejs/require.js'], {
-      'data-main': 'scripts/main'
-    });
-
-    // add a basic amd module
-    this.write('app/scripts/app.js', [
-      '/*global define */',
-      'define([], function () {',
-      '    \'use strict\';\n',
-      '    return \'\\\'Allo \\\'Allo!\';',
-      '});'
-    ].join('\n'));
-
-    this.mainJsFile = [
-      'require.config({',
-      '    paths: {',
-      '        jquery: \'../bower_components/jquery/jquery\',',
-      '        bootstrap: \'vendor/bootstrap\'',
-      '    },',
-      '    shim: {',
-      '        bootstrap: {',
-      '            deps: [\'jquery\'],',
-      '            exports: \'jquery\'',
-      '        }',
-      '    }',
-      '});',
-      '',
-      'require([\'app\', \'jquery\', \'bootstrap\'], function (app, $) {',
-      '    \'use strict\';',
-      '    // use app here',
-      '    console.log(app);',
-      '    console.log(\'Running jQuery %s\', $().jquery);',
-      '});'
-    ].join('\n');
-  }
-};
-
 AppGenerator.prototype.app = function app() {
   this.mkdir('app');
   this.mkdir('app/scripts');
