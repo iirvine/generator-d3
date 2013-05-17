@@ -21,7 +21,6 @@ var AppGenerator = module.exports = function Appgenerator(args, options, config)
 
   this.indexFile = this.readFileAsString(path.join(this.sourceRoot(), 'index.html'));
   this.mainJsFile = '';
-  this.mainCoffeeFile = 'console.log "\'Allo from CoffeeScript!"';
 
   this.on('end', function () {
     this.installDependencies({ skipInstall: options['skip-install'] });
