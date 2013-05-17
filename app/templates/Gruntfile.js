@@ -294,15 +294,7 @@ module.exports = function (grunt) {
                 'svgmin',
                 'htmlmin'
             ]
-        }<% if (includeRequireJS) { %>,
-        bower: {
-            options: {
-                exclude: ['modernizr']
-            },
-            all: {
-                rjsConfig: '<%%= yeoman.app %>/scripts/main.js'
-            }
-        }<% } %>
+        }
     });
 
     grunt.registerTask('server', function (target) {
