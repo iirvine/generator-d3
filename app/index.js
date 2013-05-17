@@ -21,6 +21,7 @@ var AppGenerator = module.exports = function Appgenerator(args, options, config)
 
   this.indexFile = this.readFileAsString(path.join(this.sourceRoot(), 'index.html'));
   this.mainJsFile = '';
+  this.mainCoffeeFile = 'console.log "\'Allo from CoffeeScript!"';
 
   this.on('end', function () {
     this.installDependencies({ skipInstall: options['skip-install'] });
@@ -52,7 +53,7 @@ AppGenerator.prototype.askFor = function askFor() {
     name: 'gist',
     message: 'Is this project a gist?',
     default: false,
-    warning: 'Yes: Barebones, one-off, CDN-backed d3 project for bl.ocks.org'
+    warning: 'Yes: Barebones, one-off, CDN-backed d3 project for bl.ocks.org/'
   }];
 
   this.prompt(prompts, function (err, props) {
@@ -106,7 +107,7 @@ AppGenerator.prototype.mainStylesheet = function mainStylesheet() {
 
 AppGenerator.prototype.writeIndex = function writeIndex() {
   // prepare default content text
-  var defaults = ['HTML5 Boilerplate'];
+  var defaults = ['HTML5 Boilerplate', 'Twitter Bootstrap'];
   var contentText = [
     '        <div class="container">',
     '            <div class="hero-unit">',
@@ -115,14 +116,7 @@ AppGenerator.prototype.writeIndex = function writeIndex() {
     '                <ul>'
   ];
 
-    this.indexFile = this.appendFiles({
-      html: this.indexFile,
-      fileType: 'js',
-      optimizedPath: 'scripts/coffee.js',
-      sourceFileList: ['scripts/hello.js'],
-      searchPath: '.tmp'
-    });
-  }
+  this.mainJsFile = 'console.log(\'\\\'Allo \\\'Allo!\');';
 
   // iterate over defaults and create content string
   defaults.forEach(function (el) {
@@ -138,10 +132,48 @@ AppGenerator.prototype.writeIndex = function writeIndex() {
     ''
   ]);
 
-  this.mainJsFile = 'console.log(\'\\\'Allo \\\'Allo!\');';
-
   // append the default content
   this.indexFile = this.indexFile.replace('<body>', '<body>\n' + contentText.join('\n'));
+};
+
+// TODO(mklabs): to be put in a subgenerator like rjs:app
+AppGenerator.prototype.requirejs = function requirejs() {
+  if (this.includeRequireJS) {
+    this.indexFile = this.appendScripts(this.indexFile, 'scripts/main.js', ['bower_components/requirejs/require.js'], {
+      'data-main': 'scripts/main'
+    });
+
+    // add a basic amd module
+    this.write('app/scripts/app.js', [
+      '/*global define */',
+      'define([], function () {',
+      '    \'use strict\';\n',
+      '    return \'\\\'Allo \\\'Allo!\';',
+      '});'
+    ].join('\n'));
+
+    this.mainJsFile = [
+      'require.config({',
+      '    paths: {',
+      '        jquery: \'../bower_components/jquery/jquery\',',
+      '        bootstrap: \'vendor/bootstrap\'',
+      '    },',
+      '    shim: {',
+      '        bootstrap: {',
+      '            deps: [\'jquery\'],',
+      '            exports: \'jquery\'',
+      '        }',
+      '    }',
+      '});',
+      '',
+      'require([\'app\', \'jquery\', \'bootstrap\'], function (app, $) {',
+      '    \'use strict\';',
+      '    // use app here',
+      '    console.log(app);',
+      '    console.log(\'Running jQuery %s\', $().jquery);',
+      '});'
+    ].join('\n');
+  }
 };
 
 AppGenerator.prototype.app = function app() {
@@ -151,4 +183,5 @@ AppGenerator.prototype.app = function app() {
   this.mkdir('app/images');
   this.write('app/index.html', this.indexFile);
   this.write('app/scripts/main.js', this.mainJsFile);
+  this.write('app/scripts/hello.coffee', this.mainCoffeeFile);
 };
